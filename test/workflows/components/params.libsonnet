@@ -12,35 +12,11 @@
       namespace: "kubeflow-test-infra",
       prow_env: "JOB_NAME=tf-k8s-presubmit-test,JOB_TYPE=presubmit,PULL_NUMBER=374,REPO_NAME=k8s,REPO_OWNER=tensorflow,BUILD_NUMBER=6e32",
       versionTag: "",
-      tfJobVersion: "v1alpha1",
+      tfJobVersion: "v1alpha2",
     },
-    master_is_chief_v1alpha1: {
-      name: "master-is-chief-v1alpha1",
-    },
-    master_is_chief_v1alpha2: {
-      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest",
-      name: "master-is-chief-v1alpha2",
-    },
-    worker0_is_chief_v1alpha1: {
-      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:v20180613-e06fc0bb-dirty-5ef291",
-      name: "worker0-is-chief-v1alpha1",
-    },
-    worker0_is_chief_v1alpha2: {
-      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:v20180613-e06fc0bb-dirty-5ef291",
-      name: "worker0-is-chief-v1alpha2",
-    },
-    simple_tfjob_v1alpha1: {
-      name: "simple-001",
-      namespace: "kubeflow-test-infra",
-      image: "",
-    },
+    // v1alpha2 components
     simple_tfjob_v1alpha2: {
       name: "simple-001",
-      namespace: "kubeflow-test-infra",
-      image: "",
-    },
-    gpu_tfjob_v1alpha1: {
-      name: "gpu-simple-001",
       namespace: "kubeflow-test-infra",
       image: "",
     },
@@ -49,28 +25,138 @@
       namespace: "kubeflow-test-infra",
       image: "",
     },
-    clean_pod_all: {
+    master_is_chief_v1alpha2: {
+      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest",
+      name: "master-is-chief-v1alpha2",
+    },
+    worker0_is_chief_v1alpha2: {
+      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:v20180613-e06fc0bb-dirty-5ef291",
+      name: "worker0-is-chief-v1alpha2",
+    },
+    clean_pod_all_v1alpha2: {
       name: "clean_pod_all",
       namespace: "kubeflow-test-infra",
       image: "",
     },
-    clean_pod_running: {
+    clean_pod_running_v1alpha2: {
       name: "clean_pod_running",
       namespace: "kubeflow-test-infra",
       image: "",
     },
-    clean_pod_none: {
+    clean_pod_none_v1alpha2: {
       name: "clean_pod_none",
       namespace: "kubeflow-test-infra",
       image: "",
     },
-    estimator_runconfig: {
+    estimator_runconfig_v1alpha2: {
       name: "estimator_runconfig",
       namespace: "kubeflow-test-infra",
       image: "",
     },
-    "invalid-tfjob": {
+    distributed_training_v1alpha2: {
+      name: "distributed_training",
+      namespace: "kubeflow-test-infra",
+      image: "gcr.io/kubeflow-examples/distributed_worker:v20181031-513e107c"
+    },
+    "invalid_tfjob_v1alpha2": {
       name: "invalid-tfjob",
+    },
+    replica_restart_policy_always_v1alpha2: {
+       name: "replica-restart-policy-always",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_onfailure_v1alpha2: {
+       name: "replica-restart-policy-onfailure",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_never_v1alpha2: {
+       name: "replica-restart-policy-never",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_exitcode_v1alpha2: {
+       name: "replica-restart-policy-exitcode",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    pod_names_validation_v1alpha2: {
+      name: "pod_names_validation",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    // v1beta1 components
+    simple_tfjob_v1beta1: {
+      name: "simple-001",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    gpu_tfjob_v1beta1: {
+      name: "gpu-simple-001",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    master_is_chief_v1beta1: {
+      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest",
+      name: "master-is-chief-v1alpha2",
+    },
+    worker0_is_chief_v1beta1: {
+      image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:v20180613-e06fc0bb-dirty-5ef291",
+      name: "worker0-is-chief-v1alpha2",
+    },
+    clean_pod_all_v1beta1: {
+      name: "clean_pod_all",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    clean_pod_running_v1beta1: {
+      name: "clean_pod_running",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    clean_pod_none_v1beta1: {
+      name: "clean_pod_none",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    estimator_runconfig_v1beta1: {
+      name: "estimator_runconfig",
+      namespace: "kubeflow-test-infra",
+      image: "",
+    },
+    distributed_training_v1beta1: {
+      name: "distributed_training",
+      namespace: "kubeflow-test-infra",
+      image: "gcr.io/kubeflow-examples/distributed_worker:v20181031-513e107c"
+    },
+    "invalid_tfjob_v1beta1": {
+      name: "invalid-tfjob",
+    },
+    replica_restart_policy_always_v1beta1: {
+       name: "replica-restart-policy-always",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_onfailure_v1beta1: {
+       name: "replica-restart-policy-onfailure",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_never_v1beta1: {
+       name: "replica-restart-policy-never",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    replica_restart_policy_exitcode_v1beta1: {
+       name: "replica-restart-policy-exitcode",
+       namespace: "kubeflow-test-infra",
+       image: "gcr.io/kubeflow-images-staging/tf-operator-test-server:latest"
+    },
+    pod_names_validation_v1beta1: {
+      name: "pod_names_validation",
+      namespace: "kubeflow-test-infra",
+      image: "",
     },
   },
 }

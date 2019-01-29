@@ -177,16 +177,10 @@ func (tc *TFController) Run(threadiness int, stopCh <-chan struct{}) error {
 
 	// Wait for the caches to be synced before starting workers.
 	log.Info("Waiting for informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, tc.tfJobInformerSynced); !ok {
-		return fmt.Errorf("failed to wait for tfjob caches to sync")
-	}
-
-	if ok := cache.WaitForCacheSync(stopCh, tc.PodInformerSynced); !ok {
-		return fmt.Errorf("failed to wait for pod caches to sync")
-	}
-
-	if ok := cache.WaitForCacheSync(stopCh, tc.ServiceInformerSynced); !ok {
-		return fmt.Errorf("failed to wait for service caches to sync")
+	if ok := cache.WaitForCacheSync(stopCh, tc.tfJobInformerSynced,
+		tc.PodInformerSynced,
+		tc.ServiceInformerSynced); !ok {
+		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
 	log.Infof("Starting %v workers", threadiness)
@@ -213,15 +207,26 @@ func (tc *TFController) runWorker() {
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the syncHandler.
 func (tc *TFController) processNextWorkItem() bool {
-	key, quit := tc.WorkQueue.Get()
+	obj, quit := tc.WorkQueue.Get()
 	if quit {
 		return false
 	}
-	defer tc.WorkQueue.Done(key)
+	defer tc.WorkQueue.Done(obj)
 
-	logger := tflogger.LoggerForKey(key.(string))
+	var key string
+	var ok bool
+	if key, ok = obj.(string); !ok {
+		// As the item in the workqueue is actually invalid, we call
+		// Forget here else we'd go into a loop of attempting to
+		// process a work item that is invalid.
+		tc.WorkQueue.Forget(obj)
+		utilruntime.HandleError(fmt.Errorf("expected string in workqueue but got %#v", obj))
+		return true
+	}
 
-	tfJob, err := tc.getTFJobFromKey(key.(string))
+	logger := tflogger.LoggerForKey(key)
+
+	tfJob, err := tc.getTFJobFromKey(key)
 	if err != nil {
 		if err == errNotExists {
 			logger.Infof("TFJob has been deleted: %v", key)
@@ -240,7 +245,7 @@ func (tc *TFController) processNextWorkItem() bool {
 	}
 
 	// Sync TFJob to match the actual state to this desired state.
-	forget, err := tc.syncHandler(key.(string))
+	forget, err := tc.syncHandler(key)
 	if err == nil {
 		if forget {
 			tc.WorkQueue.Forget(key)
@@ -248,7 +253,7 @@ func (tc *TFController) processNextWorkItem() bool {
 		return true
 	}
 
-	utilruntime.HandleError(fmt.Errorf("Error syncing tfjob: %v", err))
+	utilruntime.HandleError(fmt.Errorf("error syncing tfjob: %v", err))
 	tc.WorkQueue.AddRateLimited(key)
 
 	return true
@@ -257,7 +262,7 @@ func (tc *TFController) processNextWorkItem() bool {
 func (tc *TFController) enqueueTFJob(tfjob interface{}) {
 	key, err := KeyFunc(tfjob)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("Couldn't get key for tfjob object %#v: %v", tfjob, err))
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for tfjob object %#v: %v", tfjob, err))
 		return
 	}
 
@@ -278,9 +283,6 @@ func (tc *TFController) syncTFJob(key string) (bool, error) {
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return false, err
-	}
-	if len(namespace) == 0 || len(name) == 0 {
-		return false, fmt.Errorf("invalid tfjob key %q: either namespace or name is missing", key)
 	}
 
 	sharedTFJob, err := tc.getTFJobFromName(namespace, name)
@@ -406,7 +408,7 @@ func (tc *TFController) satisfiedExpectations(tfjob *tfv1alpha2.TFJob) bool {
 	satisfied := false
 	tfjobKey, err := KeyFunc(tfjob)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("Couldn't get key for tfjob object %#v: %v", tfjob, err))
+		utilruntime.HandleError(fmt.Errorf("couldn't get key for tfjob object %#v: %v", tfjob, err))
 		return false
 	}
 

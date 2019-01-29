@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	failedMarshalTFJobReason = "FailedInvalidTFJobSpec"
+	failedMarshalTFJobReason = "InvalidTFJobSpec"
 )
 
 // When a pod is added, set the defaults and enqueue the current tfjob.
@@ -61,11 +61,13 @@ func (tc *TFController) addTFJob(obj interface{}) {
 			client, err := k8sutil.NewCRDRestClient(&tfv1alpha2.SchemeGroupVersion)
 
 			if err == nil {
-				metav1unstructured.SetNestedField(un.Object, statusMap, "status")
-				logger.Infof("Updating the job to; %+v", un.Object)
+				if err1 := metav1unstructured.SetNestedField(un.Object, statusMap, "status"); err1 != nil {
+					logger.Errorf("Could not set nested field: %v", err1)
+				}
+				logger.Infof("Updating the job to: %+v", un.Object)
 				err = client.Update(un, tfv1alpha2.Plural)
 				if err != nil {
-					logger.Errorf("Could not update the TFJob; %v", err)
+					logger.Errorf("Could not update the TFJob: %v", err)
 				}
 			} else {
 				logger.Errorf("Could not create a REST client to update the TFJob")
@@ -91,7 +93,7 @@ func (tc *TFController) addTFJob(obj interface{}) {
 	// Convert from tfjob object
 	err = unstructuredFromTFJob(obj, tfJob)
 	if err != nil {
-		logger.Error("Failed to convert the obj: %v", err)
+		logger.Errorf("Failed to convert the obj: %v", err)
 		return
 	}
 	tc.enqueueTFJob(obj)
@@ -157,7 +159,7 @@ func (tc *TFController) cleanupTFJob(tfJob *tfv1alpha2.TFJob) error {
 	return nil
 }
 
-// deleteTFJob delets the given TFJob.
+// deleteTFJob deletes the given TFJob.
 func (tc *TFController) deleteTFJob(tfJob *tfv1alpha2.TFJob) error {
 	return tc.tfJobClientSet.KubeflowV1alpha2().TFJobs(tfJob.Namespace).Delete(tfJob.Name, &metav1.DeleteOptions{})
 }
